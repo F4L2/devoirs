@@ -176,8 +176,8 @@ f = 332.0522
 
 
 def non_cov(R,L):
-    # A ?
-    # B ? 
+    # A chain, i
+    # B chain, j
     pass
 
 def e_tot(P):
@@ -199,3 +199,45 @@ def e_tot_duet(R,L):
 
 #chaine B
 # AtomesB 
+
+
+
+
+
+# ELASTIC NETWORK 
+
+F = 1.0
+pdb_file = "3pdz.pdb"
+
+
+def atom_linkage(atoms, cutoff):
+    links = []
+    for a1 in atoms:
+        for a2 in atoms:
+            if(distance(a1,a2) < cutoff ):
+                links.append( (a1,a2) )
+    return links
+
+
+def network(pdb_file, new_pdb_file, cutoff = 5):
+    exp, resol, nummdl, lesChaines, atoms = readPDB(pdb_file, 'A')
+    links = atom_linkage(atoms, cutoff)
+
+    out = open(new_pdb_file, "w")
+    with open(pdb_file, "r") as f:
+        lines = f.readlines()
+        copy = lines[:-2] #master and end
+        footer = lines[-2:0]
+
+        print(footer)
+
+        # for line in f:
+        #     out.write(line)
+
+        # for a1, a2 in links: 
+
+    
+
+
+
+network(pdb_file = pdb_file, new_pdb_file= "ElasticNet.pdb", cutoff= 5)
