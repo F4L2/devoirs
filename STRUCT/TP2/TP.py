@@ -226,9 +226,16 @@ def network(pdb_file, new_pdb_file, cutoff = 5):
     out = open(new_pdb_file, "w")
     with open(pdb_file, "r") as f:
         lines = f.readlines()
-        copy = lines[:-2] #master and end
+        body = lines[:-2] #master and end
         footer = lines[-2:0]
 
+        #write body then 
+        # CONECT resA resB resC etc
+        # CONECT resB resA
+        # CONECT resC resA 
+        # etc 
+        #then footer
+        
         print(footer)
 
         # for line in f:
