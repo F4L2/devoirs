@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pickle as pkl
+from copy import deepcopy
 
 from tools.parse_pdb import readPDB
 
@@ -10,23 +11,10 @@ pdb_file2 = "1fcf_aliSeq.pdb"
 exp, resol, nummdl, lesChaines, lesAtomes1 = readPDB(pdb_file1, 'A') 
 exp, resol, nummdl, lesChaines, lesAtomes2 = readPDB(pdb_file2, 'A') 
 
-# class Atom:
-# 	def __init__(self, x, y, z, numRes=-1, resType="X", sse="X"):
-# 		self.x = x
-# 		self.y = y
-# 		self.z = z
-# 		self.numRes=numRes #numéro PDB du résidu
-# 		self.resType=resType #code 3 lettres de l'aa
-# 		self.sse=sse #Code 1 lettre de la Structure secondaire
-
-
-######
-
-
+### A. RSMD
 
 sel1 = [21 , 22 , 23 , 24 ,      26,       28,  29,  30,  31,  32,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47,  48,  49,  50,  51,       53,  54,  55,  56,  57,  58,  59,  60,  61,  62,  63,  64,  65,  66,  67,  68]
 sel2 = [158, 159, 160, 161, 162,      164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177,                          183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208]
-#print(len(sel1), len(sel2))
 
 num_res1 = {}
 num_res2 = {}
@@ -49,9 +37,11 @@ def RMSD(sel1,sel2,num_res1,num_res2):
 
 #print( RMSD(sel1,sel2,num_res1,num_res2) )
 
+### A.4
+#
+#
 
-
-#contact map
+### B. contact map
 
 def distance(a1, a2):
     return np.sqrt( (a1.x-a2.x)**2 + (a1.y-a2.y)**2 + (a1.z-a2.z)**2 )
@@ -71,7 +61,7 @@ def contact_map(sel1,sel2,num_res1,num_res2):
 #contact_map(sel1,sel2,num_res1,num_res2)
 
 
-#circular variance
+### C. circular variance
 def circular_variance(lesAtomes, rayon = 20):
     residus_score = {}
     for a1 in lesAtomes:
@@ -142,6 +132,8 @@ def ATOMcol12(pdb_f, CV): #lis et écris les CV dans la 12eme col d'un fichier p
     return dictionnaire
 
 
+# C.4
+#separate chains A,B
 pdb_f = "2bbm.pdb"
 exp, resol, nummdl, lesChaines, AtomesA = readPDB(pdb_f, 'A')
 cvA = circular_variance(AtomesA)
@@ -149,15 +141,13 @@ ATOMcol12(pdb_f, cvA)
 exp, resol, nummdl, lesChaines, AtomesB = readPDB(pdb_f, 'B')
 cvB = circular_variance(AtomesB)
 
-from copy import deepcopy
-
+#combined AB
 max_nResA = max(a.numRes for a in AtomesA)
 AtomesAB = AtomesA.copy()
 for aB in AtomesB:
     a = deepcopy( aB )
     a.numRes += max_nResA
     AtomesAB.append(a)
-
 cvAB = circular_variance(AtomesAB)
 
 # print(cvA)
@@ -166,14 +156,13 @@ cvAB = circular_variance(AtomesAB)
 # print()
 # print(cvAB)
 
-#champ de force
 
+### D. champ de force
 from tools.ForceField import chargePDB, epsilon_vdw_PDB
 
 dcharge = chargePDB()
 dvdw, depsilon = epsilon_vdw_PDB()
 f = 332.0522
-
 
 def non_cov(R,L):
     # A chain, i
@@ -204,7 +193,7 @@ def e_tot_duet(R,L):
 
 
 
-# ELASTIC NETWORK 
+# E. elastic network model 
 
 F = 1.0
 pdb_file = "3pdz.pdb"
@@ -244,7 +233,5 @@ def network(pdb_file, new_pdb_file, cutoff = 5):
         # for a1, a2 in links: 
 
     
-
-
 
 network(pdb_file = pdb_file, new_pdb_file= "ElasticNet.pdb", cutoff= 5)
