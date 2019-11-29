@@ -20,3 +20,9 @@ EXERCICE 3
 		seqB1+seqB2+seqB3+....
 
 		aligner en fasta puis convertir en format phylip
+
+
+EXERCICE 4 
+
+/home/alex/Documents/PHYG2019/PHYG_TME4/files/treePack/superTree/supertree -n output.tree input.trees
+
