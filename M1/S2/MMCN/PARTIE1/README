@@ -1,0 +1,20 @@
+in terminal:
+xppaut
+
+choose file.ode
+
+
+
+
+
+
+tracer courbe : i - g
+recalibrer : w - f
+changer de variable : x - "var"
+changer la courbe : viewaxes
+dernier point : i - l
+tracer depuis un point initiale donné : i - i - click
+étudier les stabilité des nullcline : s - m
+
+zoom à la main : w - z - drag
+save fig : g - p 

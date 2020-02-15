@@ -1,0 +1,51 @@
+# Modele de Chay-Keizer modifie
+# sous-systeme rapide
+# Variables:
+#    V : potentiel membranaire
+#    n : activation d'un courant potassique sortant
+
+
+# EDOs
+V'=-(Ik + Ica + Ikca + Ikatp)/cm
+n'=(ninf-n)/taun
+
+# Differentes fonctions liees aux canaux ioniques
+ninf = 1/(1+exp((vn-v)/sn))
+minf = 1/(1+exp((vm-v)/sm))
+
+# Courant ioniques
+Ikca = gkca/(1+(kd/c)^3)*(v-vk)
+Ica = gca*minf*(v-vca)
+Ik = gk*n*(v-vk)
+Ikatp = gkatp*(v-vk)
+
+# flux calcique
+Jmem = -(alpha*Ica + kpmca*c)
+
+# Conditions initiales
+init v=-65, n=0
+
+# Parametres
+par c=0.25
+par gkatp=180
+par vk=-75, vca=25, cm=5300
+par gk=2700, gca=1000
+par vm=-20, sm=12, vn=-16, sn=5
+par taun=18.7
+par gkca=400
+par kd=0.3
+par kpmca=0.18, f=0.00025
+par alpha=4.50e-6
+
+aux tsec=t/1000
+
+@ meth=rk4, dt=0.5, total=150000
+@ xp=tsec, yp=v, xlo=0, xhi=150, ylo=-75, yhi=-10
+@ bounds=900000, maxstor=100000
+# parametres de continuation
+@ autoxmin=0.08, autoxmax=0.25, autoymin=-75, autoymax=-15
+@ nmax=500, npr=2, ntst=200,
+@ ds=-0.01, dsmin=1e-07, dsmax=0.1
+@ parmin=-2, parmax=2, normmax=10000
+@ epsl=1e-06, epsu=1e-05, epss=1e-05
+done

@@ -1,0 +1,48 @@
+#------------------------------
+# modele I_Nap+I_K
+# du a E.M. Izhikevich
+#------------------------------
+
+# Equations
+V'=(I-IL-INap-IK)/C
+n'=(ninf(V)-n)/tauV
+
+
+# Fonctions d'equilibre
+minf(V)=1/(1+exp((V12m-V)/km))
+ninf(V)=1/(1+exp((V12n-V)/kn))
+
+
+# Courants ioniques
+IL=gL*(V-EL)
+INap=gNap*minf(V)*(V-ENap)
+IK=gK*n*(V-EK)
+
+# Quantites auxiliaires
+aux courantNap=INap
+aux courantK=IK
+aux courantL=IL
+
+# Parametres
+par I=0
+par gL=8.0, gNap=20.0, gK=10.0, C=1
+par EL=-80.0, ENap=60, EK=-90
+par V12m=-20.0, km=15.0, V12n=-25.0, kn=5.0
+par tauV=1
+
+
+# Conditions initiales
+init V=-75, n=0.7
+
+# Aspects numeriques
+@ total=200, method=rk4, dt=0.01
+@ xp=V, yp=n, xlo=-100, xhi=20, ylo=-0.1, yhi=0.6
+@ maxstor=900000
+@ bounds=900000
+done
+
+
+
+
+
+

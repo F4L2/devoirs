@@ -1,0 +1,63 @@
+# Modele de Plant
+# Variables:
+#    V : potentiel membranaire
+#    h : inactivation d'un courant sodique entrant
+#    n : activation d'un courant potassique sortant
+#    x : activation d'un courant ionique lent entrant
+#   Ca : concentration cytosolique en calcium libre 
+
+# EDOs
+V'=(Iappl - Ihi - Ixi - Ik - Ikca - IL)/Cm
+h'=(hinf-h)/tauh
+n'=(ninf-n)/taun
+x'=(xinf-x)/taux
+Ca'=eps*(-kc*x*(V-VCa)-Ca)
+
+# Differentes fonctions liees aux canaux ioniques
+Vs=(V+65.07)*1.20952
+alpham=0.1*(50-Vs)/(exp((50-Vs)/10)-1)
+betam=4*exp((25-Vs)/18)
+alphah=0.07*exp((25-Vs)/20)
+betah=1/(exp((55-Vs)/10)+1)
+alphan=0.01*(55-Vs)/(exp((55-Vs)/10)-1)
+betan=0.125*exp((45-Vs)/80)
+hinf=alphah/(alphah+betah)
+minf=alpham/(alpham+betam)
+ninf=alphan/(alphan+betan)
+xinf=1/(exp(-0.3*(V+40))+1)
+tauh=12.5/(alphah+betah)
+taun=12.5/(alphan+betan)
+
+# Courants ioniques
+Ihi=gi*minf*minf*minf*h*(V-Vi)
+Ixi=gt*x*(V-Vi)
+Ik=gk*n*n*n*n*(V-Vk)
+IKCa=gKCa*(Ca/(0.5+Ca))*(V-VK)
+IL=gL*(V-VL)
+Iappl=0
+
+# Conditions initiales
+init V=-50, h=0.1, n=0.1, x=0.1, Ca=0.1
+
+# Parametres
+par Cm=1
+par gi=4
+par gt=0.01
+par gK=0.3
+par gKCa=0.03
+par gL=0.003
+par Vi=30
+par VK=-75
+par VL=-40
+par VCa=140
+par eps=0.00015
+par kc=0.00425
+par taux=9400
+
+aux tsec=t/1000
+
+# Partie numerique
+@ method=rk4,dt=1,total=200000,
+@ bounds=9000000, maxstor=9000000
+@ xp=tsec, yp=v, xlo=0, xhi=200, ylo=-70, yhi=40
+done

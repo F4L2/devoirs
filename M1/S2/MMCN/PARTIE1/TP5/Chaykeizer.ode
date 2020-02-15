@@ -1,0 +1,46 @@
+# Modele de Chay-Keizer modifie
+# Variables:
+#    V : potentiel membranaire
+#    n : activation d'un courant potassique sortant
+#    c : concentration cytosolique en calcium libre 
+
+
+
+# EDOs
+V'=-(Ik + Ica + Ikca + Ikatp)/cm
+n'=(ninf-n)/taun
+c'=f*Jmem
+
+# Differentes fonctions liees aux canaux ioniques
+ninf = 1/(1+exp((vn-v)/sn))
+minf = 1/(1+exp((vm-v)/sm))
+
+# Courant ioniques
+Ikca = gkca/(1+(kd/c)^3)*(v-vk)
+Ica = gca*minf*(v-vca)
+Ik = gk*n*(v-vk)
+Ikatp = gkatp*(v-vk)
+
+# flux calcique
+Jmem = -(alpha*Ica + kpmca*c)
+
+# Conditions initiales
+init v=-65, n=0, c=0.1
+
+# Parametres
+par gkatp=180
+par vk=-75, vca=25, cm=5300
+par gk=2700, gca=1000
+par vm=-20, sm=12, vn=-16, sn=5
+par taun=18.7
+par gkca=400
+par kd=0.3
+par kpmca=0.18, f=0.00025
+par alpha=4.50e-6
+
+aux tsec=t/1000
+
+@ meth=rk4, dt=0.5, total=150000
+@ xp=tsec, yp=v, xlo=0, xhi=150, ylo=-70, yhi=-10
+@ bounds=900000, maxstor=100000
+done

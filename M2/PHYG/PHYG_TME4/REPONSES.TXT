@@ -1,0 +1,28 @@
+EXERCICE 1
+
+[TODO]
+
+
+EXERCICE 2
+
+1) 	commentaires: 	distance matrix from alignment (use 'protdist') to use neighbor
+			execute proml directly (doesn't need distance matrix) 
+
+2)	The neighbor tree is more evenly distributed than the proml tree, 
+	as the neighbor-joining tree is more globular shaped while the maximum likelyhood tree is more line shaped
+
+EXERCICE 3
+
+1)	TODO: concatener tous les alignements (pour les mêmes espèces, append les séquences)
+		>specy1
+		seqA1+seqA2+seqA3+.... #concat sequences of same specy from all famillies
+		>specy2
+		seqB1+seqB2+seqB3+....
+
+		aligner en fasta puis convertir en format phylip
+
+
+EXERCICE 4 
+
+/home/alex/Documents/PHYG2019/PHYG_TME4/files/treePack/superTree/supertree -n output.tree input.trees
+

@@ -1,0 +1,45 @@
+#---------------------------------
+# Systeme de Hodgkin-Huxley (1952)
+
+# Equations differentielles
+V'=(-IK-INa-IL+Iappl)/Cm
+m'=(alpham(V)*(1-m)-betam(V)*m)
+n'=(alphan(V)*(1-n)-betan(V)*n)
+h'=(alphah(V)*(1-h)-betah(V)*h)
+
+# Fonctions d'ouverture et fermeture pour les canaux ioniques
+alpham(V)=0.1*(V+40)/(1-exp(-0.1*(V+40)))
+alphah(V)=0.07*exp(-0.05*(V+65))
+alphan(V)=0.01*(V+55)/(1-exp(-0.1*(V+55)))
+betam(V)=4.0*exp(-0.0556*(V+65))
+betah(V)=1.0/(1+exp(-0.1*(V+35)))
+betan(V)=0.125*exp(-0.0125*(V+65))
+
+minf(V)=alpham(V)/(alpham(V)+betam(V))
+
+# Courants ioniques
+IK=gKbar*n^4*(V-VK)
+INa=gNabar*m^3*h*(V-VNa)
+IL=gLbar*(V-Vl)
+
+# Quantites auxiliaires que l'on souhaite tracer
+aux courantK=IK
+aux courantNa=INa
+aux courantFuite=IL
+aux courantAppl=Iappl
+aux var_nh=n+h
+
+# Parametres
+par gKbar=36,gNabar=120,gLbar=0.3,Cm=1
+par VK=-77,VNa=50,VL=-54.4
+par Iappl=0
+
+# Conditions initiales
+init V=-75, m=0.4, n=0.7, h=0.1
+
+# Aspects numeriques
+@ total=200, method=rk4, dt=0.01
+@ xhi=200,ylo=-80,yhi=40
+@ maxstor=900000
+@ bounds=900000
+done

@@ -1,0 +1,21 @@
+A.4 
+RMSD: 10.46
+Non les 2 résidus alignés ne sont pas superposés
+On peut déduire que l'alignement n'est pas parfait
+
+
+B.2
+Pour la dissimilarité on peut juste inverser le signe des valeurs de contact. 
+
+
+C.4
+La chaine A a possède à la fois des résidus plus enfouis et plus protubérantes que la chaines B
+La chaine B étant courte, il n'y a que peu de différence avec A lorsque l'on compare avec les 2 chaines combinées. 
+
+
+D.
+
+
+
+E.1
+Je ne vois pas de différence.
