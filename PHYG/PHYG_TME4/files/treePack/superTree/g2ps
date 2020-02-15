@@ -1,8 +1,0 @@
-#! /bin/sh
-
-# Script to output all .dot files as postscript files using neato
-
-for f in *.dot; do
-	base=`basename $f .dot`
-	neato -Tps $f -o $base.ps
-done
