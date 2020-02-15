@@ -1,0 +1,25 @@
+la matrice n'est pas carrée : méthode ARACNE pas possible
+
+
+Plot très encombré, pas clair
+Regarder caractéristiques du graphe. 
+
+characteristics:
+
+mean_degree ~ 345.35
+median_degree ~ 3L
+graph_transitivity ~ 0 (cluster coef)
+graph_mean_path_length ~ 7.68
+
+la distribution de degrée dans le graph est proche de celle du modele barbasi
+=> cluster hiérarchique
+
+
+
+
+
+On veut forcément un réseau entre tous
+
+mark/mark => il faut peut etre plusieurs régulateur pour réguler un gène
+mark/target => l'idée générale, mark régule target
+target/target => une target peut être le mark d'une autre target 

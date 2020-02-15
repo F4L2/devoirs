@@ -1,0 +1,627 @@
+---
+title: "QLife winter school - ENS 2019 : Network inference session"
+author: 
+- name: Vincent Cabeli, Hervé Isambert
+  affiliation:  Institut Curie, UMR168, Isambert team
+editor_options:
+  chunk_output_type: inline
+output:
+  html_document:
+    df_print: paged
+    number_sections: yes
+    toc: yes
+  pdf_document:
+    toc: yes
+bibliography: complete_bib.bib
+---
+
+## Setting up
+
+Make sure you can load the following packages : 
+```{r message=FALSE}
+library(MASS) # Various statistical methods
+library(ppcor) # Partial correlation
+library(parmigene) # ARACNE, CLR implementation with mutual information
+library(infotheo) # Information theory measures
+library(miic) # Causal graph inference with mutual information
+library(dplyr) # Data processing
+library(knitr) # Markdown
+library(ggplot2) # Plots
+library(gridExtra) # Plots extra
+library(Seurat) # Single cell data manipulation
+#source("utils.R")
+source("./utils.R")
+```
+
+# Introduction and statistical Theory
+
+In this session we will introduce general methods for network inference based on purely observational data.
+Our goal is to produce functionally relevant networks from a given dataset, learning the structure of the underlying interactions from the data itself. 
+
+Network inference can be seen as providing context to pairwise correlations and leveraging it to discern direct from indirect interactions.
+A functional relationship is expected to produce observable correlations (or dependencies), but observed correlations do not imply functional relationships.
+The challenge of network inference resides in retaining the direct links that reflect some understanding of nature, the data generating process, and rejecting the spurious interactions that are indirect consequences of the meaningful relationships.
+
+```{r echo=FALSE, fig.width=4, fig.height=4}
+# All defaults
+d = data.frame(Storks = c(100, 300, 1, 5000, 9, 140, 3300, 2500, 4, 5000, 5, 30000, 1500, 5000, 8000, 150, 25000),
+               Birth_rate = c(83,87,118,117,59,774,901,106,188,124,551,610,120,367,439,82,1576))
+
+fit <- lm(Birth_rate ~ Storks, data = d)
+
+ggplot(fit$model, aes_string(x = names(fit$model)[2], y = names(fit$model)[1])) + 
+  geom_point() +
+  stat_smooth(method = "lm", col = "red") + 
+  labs(title = paste("Storks deliver babies (p =",signif(summary(fit)$coef[2,4], 5), ")"))
+```
+
+Arguably one of the most important aspects of these inference methods is how the dependencies are measured in the sampled observations. 
+What can we find with which measures and how can we test for significance ?
+
+## Dependence measures {.tabset .tabset-fade}
+Formally, two random variables are said to be dependent if they do not satisfy probabilistic independence.
+In the most general sense the definition of independence is :
+$$X \perp\!\!\!\perp Y \iff P(X,Y) = P(X)P(Y)$$
+It may not be clear that the commonly used correlations measure do not test for independence in this general form.
+
+![Equitability and power of various dependence measures [@kinney_equitability_2014]](./Figures/Equitability_power.png)
+
+Few measures are able to reliably detect dependency between two random variables without being restricted to some type of interaction.
+In the context of network inference, it is worth reviewing our options as the resulting graph will only contain the interactions in the class of models that are supported by the chosen dependence measure.
+
+For testing purposes we will simulate one random variable $X$ and different imaginary functional response $Y$ :
+```{r}
+N=1000
+X = runif(N, -1, 1)
+
+Y = list(
+  linear = X + rnorm(N, sd=0.3),
+  parabolic = X**2 + rnorm(N, sd=0.15),
+  sinusoidal = sin((X)*2*3.14) + rnorm(N),
+  circular = (2*rbinom(N,1,0.5)-1) * (sqrt(1 - ((X+1) - 1)^2)) + rnorm(N, sd=0.2),
+  checkerboard = sample(c(0,2,4),N,T)+(floor(X*3)%%2==0) + runif(N, 0, 1)
+)
+Y$explinear = exp(Y$linear*3)
+
+par(mfrow=c(2,3), mar=c(2,2,1,1))
+plot(X, Y$linear)
+plot(X, Y$explinear)
+plot(X, Y$parabolic)
+plot(X, Y$sinusoidal)
+plot(X, Y$circular)
+plot(X, Y$checkerboard)
+```
+
+In every case we can see that $P(X,Y) \not=P(X)P(Y)$, and that $X$ and $Y$ share a causal relationship relationship in the sense that changing the value of $X$ also changes the value of $Y$.
+
+### Correlation coefficients
+
+The most commonly used dependence measures are linear correlation coefficients $\rho$.
+They are bounded in $[-1,1]$, and we have $\rho_{X,Y} = 0 \Rightarrow X \perp\!\!\!\perp Y$ in the bivariate normal case for populations (infinite sample size).
+Although it does not characterize independence, classical correlation is widely applied for finding linear relationships.
+
+In practice, $\rho{X,Y}$ is never null and significance is computed via hypothesis testing.
+p-values are computed with either permutations tests, [Student's t-distribution](https://en.wikipedia.org/wiki/Student%27s_t-distribution) or the [Fisher transformation](https://en.wikipedia.org/wiki/Fisher_transformation).
+Coefficients comes in two variants : the linear (Pearson's) or rank (Spearman and Kendall) correlations.
+
+We will test these measures on the simulated distributions :
+```{r}
+dependencies = data.frame()
+
+for(interaction in names(Y)){
+  dependencies['pearson', interaction] = cor(X, Y[[interaction]], method = 'pearson')
+  dependencies['spearman', interaction] = cor(X, Y[[interaction]], method = 'spearman')
+  dependencies['kendall', interaction] = cor(X, Y[[interaction]], method = 'kendall')
+}
+
+kable(dependencies,digits = 3)
+```
+
+As expected, we can only reliably detect the presence of monotonous relationships, and rank correlations are invariant under rank preserving transformations.
+Notice that the sign and strength of the sinusoidal interaction depends on where $X$ starts and ends.
+<!-- This property may prove useful when one the variables' units depend on our perception to the world but not its interaction to the other variable (e.g. distance to radioactive source vs Sievert / chance of tumour ; RNA molecules / protein functionality ?)-->
+
+We can also see that the Pearson correlation is sensitive to the presence of outliers, where the two rank correlations are robust :
+```{r}
+dependencies = data.frame()
+# Here we add two points to the distributions at the coordinates (-1,-100) and (1,100)
+X_outliers = c(-1,1)
+Y_outliers = c(-100,100)
+
+for(interaction in names(Y)){
+  dependencies['pearson', interaction] = cor(c(X,X_outliers), c(Y[[interaction]],Y_outliers), method = 'pearson')
+  dependencies['spearman', interaction] = cor(c(X,X_outliers), c(Y[[interaction]],Y_outliers), method = 'spearman')
+  dependencies['kendall', interaction] = cor(c(X,X_outliers), c(Y[[interaction]],Y_outliers), method = 'kendall')
+}
+
+kable(dependencies,digits = 3)
+```
+
+Linear and rank correlation coefficients are powerful when we want to detect monotonic interactions.
+They also provide widely accepted significance levels via hypothesis testing.
+
+However, if we wish to detect other type of interactions other measures are necessary.
+
+### Other indepedence tests
+
+Distance correlation or distance covariance is a realitively new measure of dependence between two paired random vectors that is meant to be more universal that the product-moment covariance and correlation [@szekely2009brownian].
+For **all distributions with finite first moments**, distance correlation $R$ generalizes the idea of correlation in at least two fundamental ways :
+
+1. $R(X,Y)$ is defined for $X$ and $Y$ in arbitrary dimensions.
+2. $R(X,Y) = 0 \iff X \perp\!\!\!\perp Y$
+
+Where $R(X,Y)$ is a standardized version of distance covariance $V(X,Y)$. 
+It is bounded in $[0,1]$ and is easily computable.
+
+
+```{r otherIndep}
+dependencies = data.frame()
+
+for(interaction in names(Y)){
+  res = DCOR(X, Y[[interaction]])
+  dependencies['dCor', interaction] = res$dCor
+  dependencies['dCov', interaction] = res$dCov
+  #dependencies['HSIC', interaction] = kpcalg::hsic.gamma(X, Y[[interaction]])$statistic
+}
+
+kable(dependencies,digits = 3)
+```
+
+Now that we have a more universal measure, we are able to pick up on the sinuosidal and circular relationships.
+Other independence tests exist (e.g. the Hilbert Schmidt Independence Criterion, Hoeffding's D, the Maximal Information Coefficient ...)
+
+We might be interested in interactions with inherently categorical variables that may be ordered (e.g. number of copies of the gene) or not (e.g. tissue of origin).
+Depdencies between discrete variables are classically computed with the [chi-squared test](https://en.wikipedia.org/wiki/Chi-squared_test), although it should be replaced by [G-tests](https://en.wikipedia.org/wiki/G-test), of which the $\chi^2$ test is an approximation.
+
+
+The formula of the G-test is :
+$$ G = 2\sum_{i} {O_{i} \cdot \ln\left(\frac{O_i}{E_i}\right)} $$
+With $O i \geq 0$ is the observed count in a cell, $E_{i}>0$ the expected count under the null hypothesis, $\ln$ denotes the natural logarithm, and the sum is taken over all non-empty cells.
+The next measure we will introduce can also be applied to discrete counts, but the G-test has the advantage to also come with widely accepted p-values and significance threshold.
+
+### Mutual information
+
+Lastly, we will introduce the mutual information as another dependecy variable because of its flexibility and generality. 
+In probability theory and information theory, the mutual information (MI) of two random variables is a measure of the mutual dependence between the two variables.
+It quantifies the "amount of information" (in units such as shannons, commonly called bits) obtained about one random variable through observing the other random variable.
+
+It is defined as :
+$$ \operatorname{I}(X;Y) =  \sum_{y \in Y} \sum_{x \in X} { p(x,y) \log{ \left(\frac{p(x,y)}{p(x)\,p(y)} \right) } }$$
+
+and for continuous variables : 
+
+$$ \operatorname{I}(X;Y) =  \int_{\mathcal Y} \int_{\mathcal X} {p(x,y) \log{ \left(\frac{p(x,y)}{p(x)\,p(y)} \right) } } \; dx \,dy$$
+
+It can also be defined as the difference between the sum of the marginal entropies and the common entropy : 
+
+![$\operatorname{I}(X;Y) = H(X) + H(Y) - H(X,Y)$](./Figures/Entropy-mutual-information-relative-entropy-relation-diagram.svg){width=400px}
+
+It has several desirable properties.
+First of all, it is strictly defined in relation to statistical independence for any $X,Y$ : $X \perp\!\!\!\perp Y \iff \operatorname{I}(X,Y)=0$
+It is also compliant with the [Data Processing Inequality](https://en.wikipedia.org/wiki/Data_processing_inequality) and generally equitable : its value is proportional to the strength of the interaction, whichever form it may take.
+Finally it is also invariant under invertible transformations on $X$ or $Y$.
+
+However, it is difficult to estimate on finite samples of continuous variables : it would require estimating $p(x)$ and $p(x,y)$ which is prohibitively hard in low samples regimes and high dimensions (in practice, even for $d\geq2$).
+
+The best estimates of the mutual information between continuous variables are done either through discretization (binning) of continuous variables or by directly estimating the differential entropy from $k$-nearest neighbor distances.
+Both of these approaches suffer from being dependent on some tunable parameters : the number of bins in the discretization or the number of neighbours $k$.
+
+In the case of $knn$ estimates, it is also unclear how to assess their statistical significance as they will typically still be noisy for independent $X,Y$ (to a degree dependent on the parameter $k$).
+
+The discretization approach is also heavily dependent on its parameter choice, as we see a monotonic increase of $I(X_\Delta;Y_\Delta)$ as the number of bins increases on both discretizations $\Delta$.
+The approach proposed by miic is to treat the parameter choice as an optimization problem where we try to maximize the mutual information between the discretized version of our variables minus a complexity cost that is also increasing with the number of unique values (bins) in the discretised variables.
+
+![Mutual information estimation through optimum binning](./Figures/continuous_variables_bis_4.svg){width=600px}
+
+The result of this optimization is the optimal discretization for a particular joint space so as to maximize the (penalized) mutual information.
+As we can see, different response variables $Y$ will cause different optimizations on both $Y$ and $X$ :
+
+#### {- .tabset}
+```{r discretizeMutual, echo=FALSE, results='asis', fig.height=5, fig.width=5}
+for(interaction in names(Y)){
+  cat("##### ", interaction, " \n")
+  discretizeMutual(X,Y[[interaction]], maxbins = N, plot=T)
+  cat('\n\n')
+}
+```
+
+#### {-}
+
+Using these different methods to estimate the mutual information we see that they are truly universal and find all of our simulated relationships :
+```{r discretizeMutual2}
+dependencies = data.frame()
+
+for(interaction in names(Y)){
+  dependencies['knn3', interaction] = parmigene::knnmi(X, Y[[interaction]], 3)
+  dependencies['knn10', interaction] = parmigene::knnmi(X, Y[[interaction]], 10)
+  dependencies['miic', interaction] = discretizeMutual(X,Y[[interaction]], maxbins=N, plot=F)$info
+}
+
+kable(dependencies,digits = 3)
+```
+
+Other interesting properties of the mutual information is that it is also readily defined with conditioning on another variable (see next section), and it can be computed on any combination of variable type : truly continuous, categorical, ordered factors or mixed variables.
+The drawbacks of mutual information are that unlike correlation measures, it is not bounded (upwards) by a fixed value but by $min\big(H(X), H(Y)\big)$ and less readily interpretable.
+Depending on the implementation, its value at independence can be noisy and no single significance test has been widely adopted.
+
+## {-}
+
+---
+
+---
+
+Different dependence measure are sensitive to different relationships.
+The general rule is that there is a trade-off between power and universality. 
+Linear and rank correlations are restricted to a particular set of interactions and cannot detect anything out of this set.
+However when the tested interaction happens to fall in this class of models, the simpler methods will benefit from the smaller search space and will be able to pick up on subtler signals.
+<!-- However, when we are right in our assumptions about the data, these restriced methods benefit from the smaller model space and are able to pick up on more subtle signal. -->
+<!-- As seen from the other angle, universal measure such as mutual information have to consider that signal and noise may take any form.-->
+
+In practice the choice will be made based on our prior knowledge about the data generation process (nature of interactions + technological biases and preprocessing operations) and on the goal of the analysis (pick up on all interactions ? only linear ?).
+<!-- For gene regulatory networks, we will see that more universal measures may be the better option.-->
+
+## Conditional dependence
+
+Several methods that we will see also use conditional independence measures.
+It is our main tool for removing spurious relationships, provided the explanatory variable is also measured.
+
+Formally, $A$ and $B$ are conditionally independent given $C$ if and only if, given knowledge that $C$ occurs, knowledge of whether $A$ occurs provides no information on the likelihood of $B$ occurring, and knowledge of whether $B$ occurs provides no information on the likelihood of $A$ occurring. 
+
+$$A \perp\!\!\!\perp B \mid C \quad \iff \quad P(A,B \mid C) = P(A \mid C)P(B \mid C)$$
+
+![](./Figures/conditional_indep.png){width=600px}
+
+
+Conditional independence can be thought of as having a null coefficient when regressing $A$ on $B$ with the covariate $C$ :
+```{r}
+X = rnorm(1000)
+Z = X + 0.3*rnorm(1000) # Z is defined with X
+Y = Z + 0.3*rnorm(1000) # Y is defined with Z
+d = data.frame(X,Y,Z)
+
+model1 <- lm(Y ~ X, d) # strong coefficient : X can be used to predict Y
+summary(model1)
+model2 <- lm(Y ~ X + Z, d) # null coefficient : when knowing Z, X contains no more information on Y
+summary(model2)
+```
+
+The various tests introduced in the previous section may be adapted to conditional independence testing.
+Among them, we have the partial correlation and the conditional mutual information, with the same caveats and conditions as their bivariate versions.
+
+```{r}
+# Partial correlation
+pcor(d)$estimate
+
+# Mutual information
+discretizeMutual(X,Y,plot=F)$info
+# Conditional mutual information
+discretizeMutual(X,Y,matrixU = matrix(Z, ncol=1), plot=F)$info
+```
+
+Notice that the conditional mutual information computed by miic is exactly 0 when there is conditional independence.
+It has a built-in independence test where we consider $X \perp\!\!\!\perp Y \mid Z \quad \iff \quad \operatorname{Ik}(X ; Y\mid Z) = 0$ where $\operatorname{Ik}$ is the mutual information minus the complexity cost.
+
+
+# Regulatory Networks from SC-RNAseq
+
+Now we will construct a gene regulatory network on single-cell RNA-seq data set.
+We will use the same dataset that was used in other practicals from the [Tabula Muris](https://tabula-muris.ds.czbiohub.org/) compendium, and different specialized librairies.
+
+```{r}
+library(igraph)
+library(minet) # Mutual Information NETworks
+library(bnlearn) # Bayesian network learning : contains efficient implementations of several algorithms
+library(miic) # Learning Causal or Non-Causal Graphical Models Using Information Theory
+library(GENIE3) # GEne Network Inference with Ensemble of trees
+```
+
+
+We performed the preliminary selection of T-cells among all tissues, and you are also given a list of informative transcription factors that are important for T-cell differentiation.
+
+You can first load the data and make sure it has no obvious confonding biases by performing dimensionality reduction and checking if there are no clustering based on cell properties.
+```{r tb_TSNE}
+load("./data/single_cell_data.Rdata")
+#load("./data/single_cell_data_small.Rdata")
+
+UMAPPlot(Tcells_merge, group.by="orig.ident")
+UMAPPlot(Tcells_merge, group.by="cell_ontology_class")
+```
+
+Since we are so dependent on observed correlations, it is important to make sure that the data we want to use has a meaningful scale and that correlations are not due to different normalizations, batch effect, selection bias etc...
+In the case of single-cell RNA-seq, one has to pay particular attention to probe sensitivity and cell cycle effects.
+If we do not control for these confounding factors on RNA abundance, we may observe positive correlations between most genes not because they share activation pathways, but because their expression also depends on the cell cycle.
+The Seurat package offers solutions to regress out these effects and stores the raw, normalized, and regressed data in respectively "raw.data", "data" and "scale.data".
+Here, the data was regressed on the covariates "nReads", "percent_ribo" (see the Tabula muris data digest for more information).
+
+![Cell cycle differences can create Simpson's paradox](./Figures/simpson_paradox.gif){width=600px}
+
+
+Observing single-cells at the transcription level allows us to draw more meaningful conclusions compared to bulk RNA seq, however the quality of scRNAseq data is typically much lower than traditional bulk RNAseq. One of the most important drawbacks is dropout events, meaning that a gene which is expressed even at a relatively high level may be undetected due to technical limitations such as the inefficiency of reverse transcription. Such errors are distinct from random sampling and can often lead to significant error in cell-type identification and downstream analyses.
+There are several routes one can go to circumvent the dropout values : one can infer them (using the gene's median value or predicting it from the observed values), remove them from the analysis (setting them to `NA`), or setting them to 0 (used by default).
+
+```{r tb_raw}
+expr_df = as.data.frame(t(as.matrix(GetAssayData(Tcells_merge, slot = "data"))[TFs,]))
+scale_expr_df = as.data.frame(t(as.matrix(GetAssayData(Tcells_merge, slot = "scale.data"))[TFs,]))
+
+#expr_df[expr_df==0] = NA
+#scale_expr_df[is.na(expr_df)] = NA
+```
+
+Still, it is a good idea to only select genes for which we have reasonable data (say more than 50% of observed values) :
+```{r}
+dropout_percent = apply(expr_df, 2, function(x){length(which(x==0)) / length(x)})
+good_TFs = which(dropout_percent < 0.5)
+
+print(dim(scale_expr_df))
+expr_df = expr_df[,good_TFs]
+scale_expr_df = scale_expr_df[,good_TFs]
+print(dim(scale_expr_df))
+```
+
+
+To see if there are any differences we will first plot a network inferred on the normalized, non regressed-out data and then on the data after regression.
+```{r}
+num_cores = 7
+res.miic = miic(expr_df, nThreads = num_cores, confidenceShuffle = 100, confidenceThreshold = 0.01)
+miic.plot(res.miic, igraphLayout = layout_nicely)
+```
+
+```{r tb_scale1}
+res.miic = miic(scale_expr_df, nThreads = num_cores, confidenceShuffle = 100, confidenceThreshold = 0.01)
+miic.plot(res.miic, igraphLayout = layout_nicely)
+```
+
+
+We will see simple methods for undirected graphs where we infer relationships without qualifying them further, bayesian networks which give some intepretable sense of the direction (see section 2.2), and causal graphs which aim to give a causal quality to the inferred interactions.
+
+## Undirected graph inference
+
+
+### Naive approach
+
+The simplest approach to network inference is to draw a link between every pair of variables that show significant correlation.
+We will compute a dependence pvalue for every pair of gene, and qualify as significant those below $0.05$ with the [Bonferroni correction](https://en.wikipedia.org/wiki/Bonferroni_correction).
+Note that the tests we have to perform are not independent and this correction is probably too stringent.
+
+```{r naive}
+ncols = ncol(scale_expr_df)
+sig_threshold = (0.05/((ncols-1) * ncols/2))
+naive_res = data.frame(gene1=character(), gene2=character(), stringsAsFactors = F)
+
+for(i in 1:(ncols-1)){
+  for(j in (i+1):ncols){
+    pval = cor.test(scale_expr_df[,i], scale_expr_df[,j])$p.value
+    if(pval < sig_threshold){
+      naive_res[nrow(naive_res)+1,] = list(gene1=colnames(scale_expr_df)[i], gene2=colnames(scale_expr_df)[j])
+    }
+  }
+}
+
+naive_graph = graph_from_edgelist(as.matrix(naive_res), directed = F)
+plot(naive_graph)
+```
+
+Even with the stringent correction, we find a very dense graph.
+This is the consequence of there being residual correlations between distant node because of the propagation of information.
+
+### Matrix inversion
+
+A simple way to infer a network taking into account conditional independences is to compute the inverse of the covariance matrix :
+
+![](./Figures/inverse_cov.png)
+
+It is however an unstable method to use on most datasets.
+In practice, you are not guaranteed to find an invertible covariance matrix and may have to use a [ridge regression](https://en.wikipedia.org/wiki/Tikhonov_regularization) if the determinant of the matrix is very small.
+Most methods also use some kind of regularization when computing a covariance matrix in high dimension (e.g. LASSO), which makes the result depend on the parameter chosen for the regularization.
+
+This method is left as an exercise for you to try to infer a network on the hematopoiesis dataset.
+<!--
+```{r inverse_cov, eval=FALSE}
+covMat = cov(apply(scale_expr_df, 2, as.logical))
+det(covMat)
+# Apply ridge correction
+lambda = 0.1
+for(i in 1:ncol(covMat)){
+  covMat[i,i] = covMat[i,i] + lambda
+}
+det(covMat)
+
+inverse_covMat = solve(covMat)
+diag(inverse_covMat) = 0
+inverse_covMat[inverse_covMat>-0.5] = 0
+
+inverse_graph = graph_from_adjacency_matrix(abs(inverse_covMat))
+plot(inverse_graph)
+```
+-->
+
+
+### ARACNE
+
+ARACNE is an Algorithm for the Reconstruction of Accurate Cellular Networks, one of the most cited and widely known network inference method in bioinformatics.
+It is intuitive and easy to apply to many datasets, but as we will see it also suffers from its simplicity.
+
+ARACNE relies on the previously mentionend Data Processing Inequality, an information theoretic concept according to which the information of an original signal can only be lost and never gained when said signal passes through noisy channels.
+
+![The Data Processing Inequality illustrated](./Figures/ARACNE.png){width=600px}
+
+The algorithm is fairly simple : 
+
+1. First, compute the mutual information for every pair of variable in the dataset.
+2. For every triplet $g_1, g_2, g_3$ which have shown three significant pairwise information, remove the link with the least information.
+
+It was proven that ARACNE reconstructs the correct underlying network exactly if the mutual information can be estimated without error, and if the underlying network is a tree.
+The second assumption is problematic for many applications, although ARACNE may reconstruct graphs which contains cycles there are no guarantees that the approach will perform correctly.
+
+```{r aracne}
+mi_matrix = minet::build.mim(scale_expr_df)
+
+aracne_res = minet::aracne(mi_matrix)
+aracne_graph = simplify(graph_from_adjacency_matrix(aracne_res, weighted = T, mode = "undirected"))
+plot(aracne_graph, layout=layout_nicely)
+```
+
+ARACNE, as the first two other methods seen thus far, cannot infer direction.
+An existing edge in the network can only inform of a the presence of a significant correlation not otherwise explained through the DPI, without qualifying it further.
+
+## Bayesian networks and causal graphs
+
+A more interpretable class of graphs would ideally give the direction of the relationships : gene $X$ regulates $Y$. 
+We would also want stronger guarantees that the presence of a link between $X$ and $Y$ implies that the relationship is not spurious and cannot be explained by indirect paths.
+
+A number of methods aim to recover the bayesian network underlying a set of observations.
+Bayesian networks are directed acyclic graphical models (DAGs) that represent a set of random variables and their **conditional probabilities**, from which you can read off the **conditional independences**.
+The idea behind bayesian networks is that the same (undirected) structure can be obtained with very different data generating processes, which are recognisable by observing the conditional independences in the data.
+
+![All possible directed bayesian networks with three edges](./Figures/3node-bayesnets.png)
+
+The cascade-type structures $(a,b)$ are clearly symmetric and the directionality of arrows does not matter : they encode the same dependencies $X \perp\!\!\!\perp Y | Z$.
+In fact, the third graph $(c)$, example of a confounding variable, also encodes for the same dependencies (think of regressing $X$ on $Y$ with the covariate $Z$).
+From the point of view of the data, the first three graphs are interchangeable.
+
+The fourth example is called a V-structure or collider.
+It is the only graph with three nodes that can produce the independence $X \perp\!\!\!\perp Y$ and the conditional dependence $X {\not}{\perp\!\!\!\perp} Y | Z$.
+V-structures are in fact intuitively used in our daily lives, they are the formal notation of 'explaining away' several possible causes which have the same consequence.
+Since they are produce recognisable patterns of (conditional) independence, they are also the basis for causality inference methods which we will see in a following section.
+
+
+
+![A bayesian network with its corresponding conditional probabilites](./Figures/bayesian_network.png){width=600px}
+
+
+Bayesian graphs are closer to the causality of the underlying processes and are very powerful tools for contextualizing correlations.
+They can be used to derive most of modern causal inference theory, from instrumental variables to average treatment effect (for further reading, see Judea Pearl's "Causality", Imbens and Rubin's "Causal inference for statistics, social, and biomedical sciences").
+
+We will now see some of the methods for inferring this class of graphs.
+They are divided in two groups : baysian scoring methods that assume the observations were generated from a bayesian network and tries to find the best fitting graph with likelihood scores, and constraint based approaches that try to reconstruct the graph from the data with iterative statistical tests.
+
+### Bayesian scores
+
+The first algorithm we will see uses the [Hill-climbing](https://en.wikipedia.org/wiki/Hill_climbing) approach for guessing the most fitting graph to some observed dataset.
+
+A function $f$ is used to score a DAG with respect to the training data, and a search method is used to look for the network with the best score.
+Different Bayesian and non-Bayesian scoring metrics can be used, and many heuristics have been proposed to guide the search as learning BNs from data is NP-hard.
+It generally gives a good trade-off between computational demands and the quality of the models learned, but struggles for relatively high dimensional datasets.
+
+```{r hc}
+hc_res = bnlearn::hc(scale_expr_df)
+graphviz.plot(hc_res)
+```
+
+
+### Constraint based
+
+The idea underlying constraint based methods is to satisfy as much independence present in the data as possible with iterative statistical tests and gradual grah construction.
+The most well known constraint based algorithm is called PC, named after its inventors Peter Spirtes & Clark Glymour.
+
+The PC-algorithm was designed for learning directed acyclicgraphs (DAGs) under  the  assumption  of causal  sufficiency,  i.e.,  no  unmeasured  common causes and no selection variables.
+It learns a Markov equivalence class of DAGs that can be uniquely described by a so-called completed partially directed acyclic graph (CPDAG).
+The PC-algorithm is widely used in high-dimensional settings, since it is computationally feasible for sparse graphs with up to thousands of variables.
+Moreover, the PC-algorithm has been shown to be consistent for high-dimensional sparse graphs
+
+![Constraint based algorithms](./Figures/PC_alg.png)
+
+There exist different versions of PC that use different statistical tests.
+For continuous values the original version uses gaussian conditional independence testing, while more recent variants are rank-based (rankPC) or kernel-based (kPC).
+We will refer you to the first section as the discussion about conditional testing can also be applied to these different variants of PC.
+
+The undirected graph obtained after this series of conditional independence testing is called the skeleton.
+The second step of constraint-based approaches is to orient the skeleton by looking for colliders and their patterns of dependence as seen earlier.
+They are in fact the signals of causality in the data, as the only way to find the conditional dependences encoded by V-structures is to have $X$ and $Y$ as independent causes of $Z$.
+The orientation is those V-structures is then propagated as much as possible with different rules so that the graph stays acyclic.
+
+Given sufficient sample size, assuming the underlying structure is acyclic and that there are no unobserved latent variables, the PC algorithm will recover exactly the causal graph, i.e. the natural laws that led to the generation of this dataset.
+
+
+```{r pc, warning=FALSE}
+pc_res = bnlearn::pc.stable(scale_expr_df, alpha = 0.05)
+graphviz.plot(pc_res)
+```
+
+Our team has developed an algorithm based on PC that uses the mutual information maximization scheme introduced earlier, called miic (multivariate information-based inductive causation).
+The two main ideas that make it differ from the original PC are :
+
+1. The use of the mutual information and conditional information esimation makes it applicable to any type of variables (non gaussian, continuous, discrete or mixed) and any relationships. The test is also rooted in information theoretic and has a built-in, parameter-free independence test. The density of the graph does not depend on the user's choice but on the inherent complexity of the data.
+2. The conditional independences are computed by iteratively choosing the best contributors and growing the list of contributing nodes to the separation set, unlike PC which tests all combinations of separation sets until it finds a significant set. This results in much less tests being performed while arriving at the same convergence.
+
+```{r miic}
+miic_res = miic(scale_expr_df, nThreads=num_cores)
+#miic_graph = graph_from_edgelist(as.matrix(miic_res$retained.edges.summary[,1:2]))
+#plot(miic_graph, layout=layout_nicely)
+miic.plot(miic_res, igraphLayout = layout_nicely)
+```
+
+### Hybrid methods
+
+Several methods have been proposed that try to combine the best of both worlds and work by borrowing steps from both constraint-based and bayesian scoring approaches.
+<!-- Most hybrid methods benefit form the constraint based skeleton construction and orients -->
+
+MMHC (Max-Min Hill-Climbing) is one of them : it first reconstructs the skeleton of a Bayesian network with conditional independence constraints and then performs a Bayesian-scoring greedy hill-climbing search to orient the edges.
+The idea is to start from a good, although incomplete solution with a first strategy, and then refine the partial solution using Hill-Climbing and bayesian scoring. 
+
+```{r mmhc}
+mmhc_res = bnlearn::mmhc(scale_expr_df, restrict.args = list(alpha=0.05))
+graphviz.plot(mmhc_res)
+```
+
+
+## Feature importance
+
+Finally, we will see another recent and popular network inference method that was specifically developed for inferring gene regulatory networks, although it can be used in a wide range of applications.
+
+![GENIE3 algorithm](./Figures/GENIE3.png)
+
+GENIE3 decomposes the network inference problem as several prediction problems.
+For a given dataset (e.g. an expression matrix), every variable (gene) is in turn treated as a response variable for which we try to predict the expression given all the other genes.
+Using tree-based methods (random forests or gradient boosting) the result of each sub-problem is an ordered list of informative "predictor" genes for the response variable.
+Once all of the prediction problems are done the lists of informative predictors are aggregated into a single structure, giving the rank of every pairwise variable interaction.
+The resulting network is obtained by simply choosing a cutoff on the aggregated list of interactions.
+
+There is a direct relationship between this approach and bayesian networks : it can be shown that the significant features retrieved by ensemble trees and other generic prediction algorithms constitute the [Markov blanket](https://en.wikipedia.org/wiki/Markov_blanket) of the predicted variable.
+
+![The Markov blanket of a node $A$](./Figures/Diagram_of_a_Markov_blanket.svg.png){width=400px}
+
+The ordered list of informative predictors can in fact be computed with the conditional mutual information of predictors $X$ and variable $A$ given all the other variables. 
+In practice the results of GENIE3 will differ from similar information theoretic approaches because ensemble tree methods come with their own regularization techniques and rules.
+It also comes without any guarantees nor rules on how to reconstruct the final network, it only gives an ordering from the most to the least probable edges and the user is left free to choose the cutoff.
+
+```{r genie3}
+genie3_weights = GENIE3(t(scale_expr_df), verbose=F, nCores = num_cores)
+#Retrieve the first 100 links
+genie3_res = as.matrix(getLinkList(genie3_weights)[1:100, 1:2])
+genie3_graph = graph_from_edgelist(genie3_res)
+plot(genie3_graph)
+```
+
+It was recently developed further for gene regulatory network inference with the integration of prior knowledge about TF/gene interactions (see [SCENIC](https://aertslab.org/#scenic) for information).
+However in practice the results become very dependent on the quality of the TF/gene databases and whether you can measure the genes that are in direct interaction, and the added steps make it unusable for more personalized use cases (e.g. adding variables other than gene expressions in the network).
+
+## Comparison
+
+We are beginning to understand that, although all of the mentioned methods have the same goal, finding the underlying structure of the data in the form of a graph, their results vary significantly.
+Another difficulty in applying network inference is that most methods will have tunable parameters which decide the sparsity of the graph.
+It is difficult to tune the parameters and evaluate the perforamce of a given method as the "ground truth" is only partially known.
+Some approaches try make the most of what is known (from interaction databases which may themselves be partially predicted) to find the best balance between the documented positive rate and the randomly positive rate [@lundberg2016chromnet].
+In many cases, the only option is to choose the method that performed the best on simulated benchmarks, for which the ground truth is known and is thought to approach your application.
+
+As an exercise, we will ask you to produce networks with HC, PC, miic, MMHC and GENIE3 so that the hematopoiesis gene networks have the same number of edges.
+Call the help for each function with `?pc` to understand what are the tunable parameters.
+
+```{r comparison, eval=FALSE}
+# Export
+write.table(hc_res$arcs, "./graphs/hc.csv")
+write.table(pc_res$arcs, "./graphs/pc_5e-2.csv")
+write.table(mmhc_res$arcs, "./graphs/mmhc_5e-1.csv")
+```
+
+We will import the results in Cytoscape to compare them more easily.
+Launch 'Cytoscape' from the command line and import the graph by choosing 'File', 'Import', 'Network' and 'File'.
+
+# References
+
+
+<div class="fold o">
+```{r echo=TRUE}
+sessionInfo()
+```
+</div>
