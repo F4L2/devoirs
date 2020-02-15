@@ -1,0 +1,37 @@
+
+Discrete character parsimony algorithm, version 3.697
+
+
+One most parsimonious tree found:
+
+
+                                               +Human     
+                                +--------------4  
+                                |              +Chimp     
+                                |  
+                                |              +Rat       
+  +-----------------------------2--------------3  
+  |                             |              +Mouse     
+  |                             |  
+  |                             +--------------Whale     
+  |  
+  1--------------Opossum   
+  |  
+  +-----------------------------Zebrafish 
+
+
+requires a total of      8.000
+
+  between      and       length
+  -------      ---       ------
+     1           2         2.00
+     2           4         1.00
+     4      Human          0.00
+     4      Chimp          0.00
+     2           3         1.00
+     3      Rat            0.00
+     3      Mouse          0.00
+     2      Whale          1.00
+     1      Opossum        1.00
+     1      Zebrafish      2.00
+

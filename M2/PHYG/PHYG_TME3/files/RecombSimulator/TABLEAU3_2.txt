@@ -1,0 +1,113 @@
+---TABLEAU 5 ---------------------------------
+Inversions:     9
+Translocations: 4
+Duplications:   1
+Deletions:      2
+Fusions:        0
+Fissions:       0
+WGD:            0
+
+
+---TABLEAU 3 ---------------------------------
+Inversions:     8
+Translocations: 6
+Duplications:   0
+Deletions:      1
+Fusions:        0
+Fissions:       0
+WGD:            0
+
+
+---TABLEAU 1 ---------------------------------
+Inversions:     7
+Translocations: 7
+Duplications:   2
+Deletions:      1
+Fusions:        0
+Fissions:       0
+WGD:            0
+
+
+---TABLEAU 7 ---------------------------------
+Inversions:     11
+Translocations: 6
+Duplications:   2
+Deletions:      2
+Fusions:        0
+Fissions:       0
+WGD:            0
+
+
+---TABLEAU 6 ---------------------------------
+Inversions:     8
+Translocations: 7
+Duplications:   0
+Deletions:      1
+Fusions:        0
+Fissions:       0
+WGD:            0
+
+
+---TABLEAU 10 ---------------------------------
+Inversions:     9
+Translocations: 3
+Duplications:   0
+Deletions:      3
+Fusions:        1
+Fissions:       0
+WGD:            0
+
+
+---TABLEAU 2 ---------------------------------
+Inversions:     10
+Translocations: 4
+Duplications:   0
+Deletions:      0
+Fusions:        0
+Fissions:       0
+WGD:            0
+
+
+---TABLEAU 9 ---------------------------------
+Inversions:     9
+Translocations: 6
+Duplications:   0
+Deletions:      1
+Fusions:        0
+Fissions:       0
+WGD:            0
+
+
+---TABLEAU 4 ---------------------------------
+Inversions:     12
+Translocations: 4
+Duplications:   0
+Deletions:      1
+Fusions:        0
+Fissions:       0
+WGD:            0
+
+
+---TABLEAU 8 ---------------------------------
+Inversions:     7
+Translocations: 4
+Duplications:   2
+Deletions:      1
+Fusions:        0
+Fissions:       1
+WGD:            0
+
+
+_________________
+---OVERALL-------
+Deletions:	13
+Fissions:	1
+Translocations:	51
+WGD:		0
+Fusions:	1
+Duplications:	7
+Inversions:	90
+
+------------
+Most :	Inversions | 90
+Least :	WGD | 0

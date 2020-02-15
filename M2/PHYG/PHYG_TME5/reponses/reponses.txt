@@ -1,0 +1,29 @@
+Ex1:
+
+	We can explain artificial1 by a tree, but we can't for artificial2. 
+	artificial2 has most probably been subject to horizontal genetic transfers. 
+
+Ex2:
+
+3.	For all 3 methods, rattus_norbegius and mus_musculus share a direct ancestor.
+	So all three trees agree. 
+
+
+4.	The SplitDecomposition says that the pig only share genetic material by horizontal transfers to both cow and horse. 
+
+5.	We couldn't find a simple tree because the pig come from hybridation, so we can't retrodict with a purely evolutionnary approach.  
+
+
+Ex3:
+
+2-3.	We can still see the wrong branch that disconnects these 3 species. 
+	But these branch now have a low level of confidence (about 20-30% for most)
+
+4.	77.8
+
+5.	This value represents the confidence of the split that regroups pig and horse
+
+6.	90
+
+7.	99.9 (cow-pig)
+	We still have a near perfect value of confidence after 1000 iterations, so this split is very robust and likely to be true. 

@@ -1,0 +1,25 @@
+1.1
+
+1.2
+The parameters directly infer on the simulation
+1.3
+Yes, the parameters don't change during the whole simulation. Physics don't change according to an organism
+
+
+3.2
+/3_45/TABLEAU3_2.txt
+
+3.3
+There's an event that never happen
+WGD:		0
+We notice that the mutation which did not happen is complex and imply a large scale modification.
+It did not happen weither because the energy cost or because the mortality risk is too high.  
+We know for a fact that this event happens, the probability might just be very low.  
+
+
+3.4
+(figures)
+
+3.5 
+The trees are similar in the sense that both describe the same order of speciation. 
+But the reconstructed one have more precise distance values (NJ-like) where the simulated one have fixed end distances (UPGMA-like)

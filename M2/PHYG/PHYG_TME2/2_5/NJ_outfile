@@ -1,0 +1,39 @@
+
+   6 Populations
+
+Neighbor-Joining/UPGMA method version 3.697
+
+
+ Neighbor-joining method
+
+ Negative branch lengths allowed
+
+
+  +-Chimp     
+  ! 
+  !               +----------------Dog       
+  !               ! 
+  2---------------3                           +----------Mouse     
+  !               ! +-------------------------1 
+  !               +-4                         +---------------Rat       
+  !                 ! 
+  !                 +---------------------------Cow       
+  ! 
+  +Human     
+
+
+remember: this is an unrooted tree!
+
+Between        And            Length
+-------        ---            ------
+   2          Chimp          10.25000
+   2             3           84.31250
+   3          Dog            86.18750
+   3             4            5.81250
+   4             1          136.56250
+   1          Mouse          58.12500
+   1          Rat            82.87500
+   4          Cow           143.43750
+   2          Human           4.75000
+
+

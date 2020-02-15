@@ -1,0 +1,389 @@
+Version   SplitsTree4 (version 4.14.8, built 15 Nov 2018)
+Copyright (C) 2017 Daniel H. Huson and David J. Bryant. This program comes with ABSOLUTELY NO WARRANTY.
+Version   SplitsTree4 (version 4.14.8, built 15 Nov 2018)
+Copyright (C) 2017 Daniel H. Huson and David J. Bryant. This program comes with ABSOLUTELY NO WARRANTY.
+
+Attempting data conversion to Nexus format
+Importing splitstree4.externalIO.imports.FastA: Importing aligned sequences: ntax=45 nchar=1495 type=protein
+TAXA
+Read TAXA:
+	45 taxa
+Read CHARACTERS:
+CHARACTERS
+	45 sequences, each 1495, datatype: protein
+Read TAXA:
+	45 taxa
+Read CHARACTERS:
+	45 sequences, each 1495, datatype: protein
+Read ST_ASSUMPTIONS:
+	Not up-to-date
+--------- Start update ----------
+Active sites: 1495
+Number of Constant sites:     506
+Number of Non-parsimony-informative sites: 345
+Number of gapped sites         516
+Number of sites with missing data      0
+	(Excluded 0 site(s) with at least 100% missing data)
+Class not found: .Uncorrected_P
+Computing CHARACTERS to DISTANCES: Uncorrected_P Normalize=true HandleAmbiguousStates=Ignore
+Class not found: .NeighborNet
+Computing DISTANCES to SPLITS: NeighborNet Variance=Ordinary_Least_Squares LambdaFrac=1.0
+
+Recomputed fit:
+	fit = 98.39835050304097
+	LS fit =99.9593044568541
+	stress =0.02017462815448015
+
+Splits: cyclic
+
+Class not found: .EqualAngle
+Computing SPLITS to NETWORK: EqualAngle UseWeights=true RunConvexHull=true DaylightIterations=0 OptimizeBoxesIterations=0 SpringEmbedderIterations=0
+--------- End update ----------
+Attempting data conversion to Nexus format
+Importing splitstree4.externalIO.imports.FastA: Importing aligned sequences: ntax=45 nchar=1495 type=protein
+TAXA
+Read TAXA:
+	45 taxa
+Read CHARACTERS:
+CHARACTERS
+	45 sequences, each 1495, datatype: protein
+Read TAXA:
+	45 taxa
+Read CHARACTERS:
+	45 sequences, each 1495, datatype: protein
+Read ST_ASSUMPTIONS:
+	Not up-to-date
+--------- Start update ----------
+Active sites: 1495
+Number of Constant sites:     506
+Number of Non-parsimony-informative sites: 345
+Number of gapped sites         516
+Number of sites with missing data      0
+	(Excluded 0 site(s) with at least 100% missing data)
+Class not found: .Uncorrected_P
+Computing CHARACTERS to DISTANCES: Uncorrected_P Normalize=true HandleAmbiguousStates=Ignore
+Class not found: .NeighborNet
+Computing DISTANCES to SPLITS: NeighborNet Variance=Ordinary_Least_Squares LambdaFrac=1.0
+
+Recomputed fit:
+	fit = 98.39835050304097
+	LS fit =99.9593044568541
+	stress =0.02017462815448015
+
+Splits: cyclic
+
+Class not found: .EqualAngle
+Computing SPLITS to NETWORK: EqualAngle UseWeights=true RunConvexHull=true DaylightIterations=0 OptimizeBoxesIterations=0 SpringEmbedderIterations=0
+--------- End update ----------
+Attempting data conversion to Nexus format
+Importing splitstree4.externalIO.imports.FastA: Importing aligned sequences: ntax=45 nchar=1495 type=protein
+TAXA
+Read TAXA:
+	45 taxa
+Read CHARACTERS:
+CHARACTERS
+	45 sequences, each 1495, datatype: protein
+Read TAXA:
+	45 taxa
+Read CHARACTERS:
+	45 sequences, each 1495, datatype: protein
+Read ST_ASSUMPTIONS:
+	Not up-to-date
+--------- Start update ----------
+Active sites: 1495
+Number of Constant sites:     506
+Number of Non-parsimony-informative sites: 345
+Number of gapped sites         516
+Number of sites with missing data      0
+	(Excluded 0 site(s) with at least 100% missing data)
+Class not found: .Uncorrected_P
+Computing CHARACTERS to DISTANCES: Uncorrected_P Normalize=true HandleAmbiguousStates=Ignore
+Class not found: .NeighborNet
+Computing DISTANCES to SPLITS: NeighborNet Variance=Ordinary_Least_Squares LambdaFrac=1.0
+
+Recomputed fit:
+	fit = 98.39835050304097
+	LS fit =99.9593044568541
+	stress =0.02017462815448015
+
+Splits: cyclic
+
+Class not found: .EqualAngle
+Computing SPLITS to NETWORK: EqualAngle UseWeights=true RunConvexHull=true DaylightIterations=0 OptimizeBoxesIterations=0 SpringEmbedderIterations=0
+--------- End update ----------
+Class not found: .Uncorrected_P
+Excluded sites:
+
+Class not found: .Uncorrected_P
+executing assume distTransform=UPGMA
+Read ST_ASSUMPTIONS:
+	Not up-to-date
+Computing DISTANCES to TREES: UPGMA
+done
+Trees are partial: false
+Computing TREES to SPLITS: TreeSelector Which=1
+done
+Splits: compatible
+
+Class not found: .EqualAngle
+Computing SPLITS to NETWORK: EqualAngle UseWeights=true RunConvexHull=true DaylightIterations=0 OptimizeBoxesIterations=0 SpringEmbedderIterations=0
+
+Recomputed fit:
+	fit = 84.31919469991793
+	LS fit =88.81787721533645
+	stress =0.27660724624284483
+
+Excluded sites:
+
+Class not found: .Uncorrected_P
+Class not found: .Uncorrected_P
+Run
+Executing bootstrap
+Runs = 1000
+executing bootstrap runs=1000; draw splitlabels=confidence
+Read ST_BOOTSTRAP:
+	1000 runs
+Bootstrapping...
+done
+Excluded sites:
+
+Class not found: .Uncorrected_P
+Class not found: .Uncorrected_P
+executing update splits
+Splits: compatible
+
+Class not found: .EqualAngle
+Computing SPLITS to NETWORK: EqualAngle UseWeights=true RunConvexHull=true DaylightIterations=0 OptimizeBoxesIterations=0 SpringEmbedderIterations=0
+Excluded sites:
+
+Class not found: .Uncorrected_P
+Class not found: .Uncorrected_P
+Run
+Executing bootstrap
+Runs = 1000
+executing bootstrap runs=1000; draw splitlabels=confidence
+Read ST_BOOTSTRAP:
+	1000 runs
+Bootstrapping...
+done
+Excluded sites:
+
+Class not found: .Uncorrected_P
+Class not found: .Uncorrected_P
+executing update splits
+Splits: compatible
+
+Class not found: .EqualAngle
+Computing SPLITS to NETWORK: EqualAngle UseWeights=true RunConvexHull=true DaylightIterations=0 OptimizeBoxesIterations=0 SpringEmbedderIterations=0
+Excluded sites:
+
+Class not found: .Uncorrected_P
+Class not found: .Uncorrected_P
+Run
+Executing bootstrap
+Runs = 1000
+executing bootstrap runs=1000; draw splitlabels=confidence
+Read ST_BOOTSTRAP:
+	1000 runs
+Bootstrapping...
+done
+Excluded sites:
+
+Class not found: .Uncorrected_P
+Class not found: .Uncorrected_P
+(Export panel size: 7837 x 3151)
+Written to file: /home/alex/Documents/PHYG2019/PHYG_TME5/Ex3_2
+Class not found: .Uncorrected_P
+executing update splits
+Splits: compatible
+
+Class not found: .EqualAngle
+Computing SPLITS to NETWORK: EqualAngle UseWeights=true RunConvexHull=true DaylightIterations=0 OptimizeBoxesIterations=0 SpringEmbedderIterations=0
+Run
+Executing bootstrap
+Runs = 1000
+executing bootstrap runs=1000; draw splitlabels=confidence
+Read ST_BOOTSTRAP:
+	1000 runs
+Bootstrapping...
+done
+Class not found: .Uncorrected_P
+Excluded sites:
+
+Class not found: .Uncorrected_P
+executing assume splitsTransform=Phylogram Cladogram=false Slanted=false Angle=60.0
+Read ST_ASSUMPTIONS:
+	Not up-to-date
+Splits: compatible
+
+Computing SPLITS to NETWORK: Phylogram Cladogram=false Slanted=false Angle=60.0
+Excluded sites:
+
+Class not found: .Uncorrected_P
+Class not found: .Uncorrected_P
+Run
+Executing bootstrap
+Runs = 1000
+executing bootstrap runs=1000; draw splitlabels=confidence
+Read ST_BOOTSTRAP:
+	1000 runs
+Bootstrapping...
+done
+Excluded sites:
+
+Class not found: .Uncorrected_P
+Class not found: .Uncorrected_P
+executing assume splitsTransform=ClusterNetwork UseWeights=true OutGroup="First-Taxon" Layout=EqualAngle120 Simplify=false PercentOffset=10
+Read ST_ASSUMPTIONS:
+	Not up-to-date
+Splits: compatible
+
+Computing SPLITS to NETWORK: ClusterNetwork UseWeights=true OutGroup="First-Taxon" Layout=EqualAngle120 Simplify=false PercentOffset=10
+Excluded sites:
+
+Class not found: .Uncorrected_P
+Class not found: .Uncorrected_P
+executing assume distTransform=SplitDecomposition
+Read ST_ASSUMPTIONS:
+	Not up-to-date
+Computing DISTANCES to SPLITS: SplitDecomposition
+
+Recomputed fit:
+	fit = 71.74292447952753
+	LS fit =92.4852687950513
+	stress =0.3715209941186283
+
+Applying dimension filter
+Running Dimension-Filter for d=4
+(Small D: using D-subgraph)
+Splits removed: 0
+Splits: cyclic
+
+Computing SPLITS to NETWORK: ClusterNetwork UseWeights=true OutGroup="First-Taxon" Layout=EqualAngle120 Simplify=false PercentOffset=10
+Excluded sites:
+
+Class not found: .Uncorrected_P
+Class not found: .Uncorrected_P
+executing assume distTransform=UPGMA
+Read ST_ASSUMPTIONS:
+	Not up-to-date
+Computing DISTANCES to TREES: UPGMA
+done
+Trees are partial: false
+Computing TREES to SPLITS: TreeSelector Which=1
+done
+Splits: compatible
+
+Computing SPLITS to NETWORK: ClusterNetwork UseWeights=true OutGroup="First-Taxon" Layout=EqualAngle120 Simplify=false PercentOffset=10
+
+Recomputed fit:
+	fit = 84.31919469991793
+	LS fit =88.81787721533645
+	stress =0.27660724624284483
+
+Excluded sites:
+
+Class not found: .Uncorrected_P
+Class not found: .Uncorrected_P
+Run
+Executing bootstrap
+Runs = 1000
+executing bootstrap runs=1000; draw splitlabels=confidence
+Read ST_BOOTSTRAP:
+	1000 runs
+Bootstrapping...
+done
+Excluded sites:
+
+Class not found: .Uncorrected_P
+Class not found: .Uncorrected_P
+Class not found: .Uncorrected_P
+Excluded sites:
+
+Class not found: .Uncorrected_P
+executing assume distTransform=UPGMA
+Read ST_ASSUMPTIONS:
+	Not up-to-date
+Computing DISTANCES to TREES: UPGMA
+done
+Trees are partial: false
+Computing TREES to SPLITS: TreeSelector Which=1
+done
+Splits: compatible
+
+Class not found: .EqualAngle
+Computing SPLITS to NETWORK: EqualAngle UseWeights=true RunConvexHull=true DaylightIterations=0 OptimizeBoxesIterations=0 SpringEmbedderIterations=0
+
+Recomputed fit:
+	fit = 84.31919469991793
+	LS fit =88.81787721533645
+	stress =0.27660724624284483
+
+Excluded sites:
+
+Class not found: .Uncorrected_P
+Class not found: .Uncorrected_P
+Run
+Executing bootstrap
+Runs = 1000
+executing bootstrap runs=1000; draw splitlabels=confidence
+Read ST_BOOTSTRAP:
+	1000 runs
+Bootstrapping...
+done
+Excluded sites:
+
+Class not found: .Uncorrected_P
+Class not found: .Uncorrected_P
+(Export panel size: 1674 x 925)
+Written to file: /home/alex/Documents/PHYG2019/PHYG_TME5/Ex3_4
+Run
+Executing bootstrap
+Runs = 10
+executing bootstrap runs=10; draw splitlabels=confidence
+Read ST_BOOTSTRAP:
+	10 runs
+Bootstrapping...
+done
+Excluded sites:
+
+Class not found: .Uncorrected_P
+Class not found: .Uncorrected_P
+(Export panel size: 1674 x 925)
+Written to file: /home/alex/Documents/PHYG2019/PHYG_TME5/Ex3_5
+executing assume distTransform=NJ
+Read ST_ASSUMPTIONS:
+	Not up-to-date
+Computing DISTANCES to TREES: NJ
+done
+Trees are partial: false
+Computing TREES to SPLITS: TreeSelector Which=1
+done
+Splits: compatible
+
+Class not found: .EqualAngle
+Computing SPLITS to NETWORK: EqualAngle UseWeights=true RunConvexHull=true DaylightIterations=0 OptimizeBoxesIterations=0 SpringEmbedderIterations=0
+
+Recomputed fit:
+	fit = 97.47141104029319
+	LS fit =99.88764728526122
+	stress =0.03320650005581229
+
+Excluded sites:
+
+Class not found: .Uncorrected_P
+Class not found: .Uncorrected_P
+Run
+Executing bootstrap
+Runs = 1000
+executing bootstrap runs=1000; draw splitlabels=confidence
+Read ST_BOOTSTRAP:
+	1000 runs
+Bootstrapping...
+done
+Excluded sites:
+
+Class not found: .Uncorrected_P
+Class not found: .Uncorrected_P
+(Export panel size: 1674 x 925)
+Written to file: /home/alex/Documents/PHYG2019/PHYG_TME5/Ex3_7

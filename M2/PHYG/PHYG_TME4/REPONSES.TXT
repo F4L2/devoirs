@@ -1,6 +1,10 @@
 EXERCICE 1
 
-[TODO]
+1)	With thousands of species, some specy might not share the same genes and therefore makes the comparison between between species difficult. 
+	There's 2 main strategies for reconstructing multiple gene phylogenic trees, first is to concatenate all the sequence alignment of each specy to form a supermatrix that will infere the consensus tree. The second method is to find the maximum agreement tree from all the trees infered from the sequence alignment of each specy. 
+
+2)	MAST: Try to fit the most leaves into the trees, at the condition that the leaves' edges are not ambiguous (for the same selection of leaves, and in each trees, a specific leaf must not have different edges). 
+	MCT: Basically MAST but on trees which are not necessarly binary.
 
 
 EXERCICE 2
@@ -9,20 +13,27 @@ EXERCICE 2
 			execute proml directly (doesn't need distance matrix) 
 
 2)	The neighbor tree is more evenly distributed than the proml tree, 
-	as the neighbor-joining tree is more globular shaped while the maximum likelyhood tree is more line shaped
+	as the neighbor-joining tree is more globular shaped while the maximum likelyhood tree is more linear shaped
 
 EXERCICE 3
 
-1)	TODO: concatener tous les alignements (pour les mêmes espèces, append les séquences)
-		>specy1
-		seqA1+seqA2+seqA3+.... #concat sequences of same specy from all famillies
-		>specy2
-		seqB1+seqB2+seqB3+....
+1)	commentaires: 	concatener tous les alignements (pour les mêmes espèces, append les séquences)
+			>specy1
+			seqA1+seqA2+seqA3+.... #concat sequences of same specy from all famillies
+			>specy2
+			seqB1+seqB2+seqB3+....
 
-		aligner en fasta puis convertir en format phylip
+			aligner en fasta puis convertir en format phylip
 
+2)	The neighbor tree have more average branch length in the sense that we don't see as much very short branch as in the maximum likelyhood tree. 
+	
+	
 
 EXERCICE 4 
 
 /home/alex/Documents/PHYG2019/PHYG_TME4/files/treePack/superTree/supertree -n output.tree input.trees
+
+
+
+EXERCICE 5
 

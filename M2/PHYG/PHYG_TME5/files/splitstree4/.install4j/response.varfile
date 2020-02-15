@@ -1,0 +1,10 @@
+# install4j response file for SplitsTree4 4.14.8
+myXmx$Integer=600
+sys.adminRights$Boolean=false
+sys.component.1691242192$Boolean=true
+sys.component.1691242193$Boolean=true
+sys.component.1691242194$Boolean=true
+sys.installationDir=/home/vicedomini/tmp/PHYG-TME5/files/splitstree4_14
+sys.languageId=en
+sys.programGroupDisabled$Boolean=true
+sys.symlinkDir=/usr/local/bin

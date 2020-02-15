@@ -1,0 +1,60 @@
+Exercice 1 :
+
+1.	Helicobacter_pylori:	
+
+	The purple line is almost a diagonal
+	The blue line is mostly scattered but we can notice 2 small anti-diagonal bits that inversly complete the purple diagonal. 
+		
+	-Relocations : 38
+	-Insertions : 228
+	-Deletions :  ? 
+
+
+2. 	Pgingivalis_33277 | Pgingivalis_381
+
+	We can see an almost perfect purple diagonal
+	And completely scattered blue points that form anti-diagonals but this is seemingly due to randomness
+
+	-Relocations : 4
+	-Insertions : 2
+	-Deletions :  ?
+
+	
+	Pgingivalis_33277 | Pgingivalis_HG66
+
+	We can see short diagonals formed here and there for both colors.
+	But they never follow the same direction. 
+
+	-Relocations : 19
+	-Insertions : 72
+	-Deletions :  ?
+
+
+Exercice 2:
+
+1. 	Increasing the threshold reveals synteny blocks. Inversely decreasing patterns increase the noise that enveils those blocks. 
+
+
+3.	Yes, we can see a well-conserved block
+
+4.	We can see there's 2 conserved regions
+	One start from Phat1 to Phat6.
+	The other one start from Phat8 to the Phat18. 
+
+5.	Yes, there's plenty. knowlesi contig only contains some 'Phat' genes while falciparum contains a lot more families and even phat genes 		not annoted in knowlesi contig.
+
+6.	(optional)
+
+7.	We can see at least 5 conserved blocks
+	Some genes are not present on both sequences, such as L2969.01
+
+
+
+Exercice 3:
+
+
+2.	The dentist performed on already infected patients, it's very unlikely he did any wrong here. 
+
+3.	The bootstrap indicates we can be half sure about the location of the dentist patients' clade. 
+	Nevertheless according the the actual location of the dentist clade (in the infected clade), and the fact that we are sure of the separation between infected and the control patients. 
+	We are actually pretty confident that the dentist is not guilty. 
